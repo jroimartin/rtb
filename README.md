@@ -1,3 +1,3 @@
 # rtb
 
-RealTimeBattle package for Go.
+Package rtb provides support for writing RealTimeBattle robots.
