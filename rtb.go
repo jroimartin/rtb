@@ -3,7 +3,6 @@ package rtb
 
 import (
 	"bufio"
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -545,8 +544,7 @@ type ListenSettings struct {
 
 // Listen initializes the RTB communication channel and listens to RTB
 // messages. It returns a channel on which the received messages are delivered.
-// A context can be used to shutdown the robot gracefully.
-func Listen(ctx context.Context, settings ListenSettings) <-chan any {
+func Listen(settings ListenSettings) <-chan any {
 	// We dedicate a goroutine to read from stdin, so we use blocking mode.
 	// Blocking mode is also simpler and more predictable.
 	robotOption(rOptionUseNonBlocking, 0)
@@ -559,22 +557,17 @@ func Listen(ctx context.Context, settings ListenSettings) <-chan any {
 		defer close(msgs)
 
 		for {
-			select {
-			case line, ok := <-stdin:
-				if !ok {
-					Debugf("stdin channel is closed")
-					return
-				}
-				msg, err := parseMessage(line)
-				if err != nil {
-					Debugf("error parsing message %q: %v", line, err)
-					continue
-				}
-				msgs <- msg
-			case <-ctx.Done():
-				Debugf("shutdown: %v", ctx.Err())
+			line, ok := <-stdin
+			if !ok {
+				Debugf("stdin channel is closed")
 				return
 			}
+			msg, err := parseMessage(line)
+			if err != nil {
+				Debugf("error parsing message %q: %v", line, err)
+				continue
+			}
+			msgs <- msg
 		}
 	}()
 
