@@ -529,8 +529,8 @@ type (
 	MessageExitRobot struct{}
 )
 
-// Options allows to configure the robot options.
-type Options struct {
+// ListenSettings defines the settings passed to Listen.
+type ListenSettings struct {
 	// SendRotationReached tells the server to send a RotationReached
 	// message when a rotation is finished. With a value of 1, the message
 	// is sent when a RotateTo or a RotateAmount is finished, with a value
@@ -546,15 +546,15 @@ type Options struct {
 // Listen initializes the RTB communication channel and listens to RTB
 // messages. It returns a channel on which the received messages are delivered.
 // A context can be used to shutdown the robot gracefully.
-func Listen(ctx context.Context, options Options) <-chan any {
+func Listen(ctx context.Context, settings ListenSettings) <-chan any {
 	// We dedicate a goroutine to read from stdin, so we use blocking mode.
 	// Blocking mode is also simpler and more predictable.
 	robotOption(rOptionUseNonBlocking, 0)
 
-	robotOption(rOptionSendRotationReached, options.SendRotationReached)
+	robotOption(rOptionSendRotationReached, settings.SendRotationReached)
 
 	stdin := stdinReader()
-	msgs := make(chan any, options.ChanBufferCapacity)
+	msgs := make(chan any, settings.ChanBufferCapacity)
 	go func() {
 		defer close(msgs)
 
