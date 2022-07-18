@@ -513,7 +513,7 @@ type (
 	}
 
 	// MessageWarning can be sent when the robot has to be notified on
-	// different problems which have occured.
+	// different problems which have occurred.
 	MessageWarning struct {
 		// Warning is the type of warning.
 		Warning Warning
