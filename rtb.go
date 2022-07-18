@@ -5,9 +5,20 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
+)
+
+var (
+	// osStdin is used to receive message from the RTB server. It is used
+	// by tests.
+	osStdin io.Reader = os.Stdin
+
+	// osStdout is used to send messages to the RTB server. It is used by
+	// tests.
+	osStdout io.Writer = os.Stdout
 )
 
 // rawf sends a raw message. It returns error if the message is longer than 128
@@ -22,7 +33,7 @@ func rawf(format string, a ...any) error {
 		return fmt.Errorf("message is too long (%v)", len(s))
 	}
 
-	fmt.Print(s)
+	fmt.Fprint(osStdout, s)
 
 	return nil
 }
@@ -41,18 +52,18 @@ const (
 	// 1, the message is sent when a RotateTo or a RotateAmount is
 	// finished, with a value of 2, changes in sweep direction are also
 	// notified. Default is 0, i.e. no messages are sent.
-	rOptionSendRotationReached = 1
+	rOptionSendRotationReached rOption = 1
 
 	// rOptionSignal tells the server to send a signal when there is a
 	// message waiting. The argument will determine which signal. Send this
 	// message as soon as you are prepared to receive the signal. Default
 	// is 0, which means don't send any signals.
-	rOptionSignal = 2
+	rOptionSignal rOption = 2
 
 	// rOptionUseNonBlocking selects how to reading messages works. This
 	// option should be sent exactly once as soon as the program starts.
 	// Since it should always be given, there is no default value.
-	rOptionUseNonBlocking = 3
+	rOptionUseNonBlocking rOption = 3
 )
 
 // robotOption sets option to value.
@@ -86,10 +97,10 @@ const (
 	PartRobot Part = 1
 
 	// PartCannon is the cannon of the robot.
-	PartCannon = 2
+	PartCannon Part = 2
 
 	// PartRadar is the radar of the robot.
-	PartRadar = 4
+	PartRadar Part = 4
 )
 
 func (p Part) String() string {
@@ -146,7 +157,7 @@ func Accelerate(value float64) error {
 // Brake sets the brake. Full brake (portion = 1.0) means that the friction in
 // the robot direction is equal to Slide friction.
 func Brake(portion float64) error {
-	return rawf("Break %f", portion)
+	return rawf("Brake %f", portion)
 }
 
 // Shoot with the given energy.
@@ -190,57 +201,57 @@ const (
 	// GOptionRobotCannonMaxRotate is the maximum cannon rotate speed. Note
 	// that the cannon moves relative to the robot, so the actual rotation
 	// speed may be higher.
-	GOptionRobotCannonMaxRotate = 1
+	GOptionRobotCannonMaxRotate GOption = 1
 
 	// GOptionRobotRadarMaxRotate is the maximum radar rotate speed. Note
 	// that the radar moves relative to the robot, so the actual rotation
 	// speed may be higher.
-	GOptionRobotRadarMaxRotate = 2
+	GOptionRobotRadarMaxRotate GOption = 2
 
 	// GOptionRobotMaxAcceleration indicates that robots are not allowed to
 	// accelerate faster than this.
-	GOptionRobotMaxAcceleration = 3
+	GOptionRobotMaxAcceleration GOption = 3
 
 	// GOptionRobotMinAcceleration indicates that robots are not allowed to
 	// accelerate slower than this.
-	GOptionRobotMinAcceleration = 4
+	GOptionRobotMinAcceleration GOption = 4
 
 	// GOptionRobotStartEnergy is the amount of energy the robots will have
 	// at the beginning of each game.
-	GOptionRobotStartEnergy = 5
+	GOptionRobotStartEnergy GOption = 5
 
 	// GOptionRobotMaxEnergy is the maximum amount of energy a robot can
 	// get. By eating a cookie, the robot can increase its energy; not
 	// more than this, though.
-	GOptionRobotMaxEnergy = 6
+	GOptionRobotMaxEnergy GOption = 6
 
 	// GOptionRobotEnergyLevels decides how many discretation levels will
 	// be used.
-	GOptionRobotEnergyLevels = 7
+	GOptionRobotEnergyLevels GOption = 7
 
 	// GOptionShotSpeed is speed of the shot in the direction of the
 	// cannon. Shots move at this speed plus the velocity of the robot.
-	GOptionShotSpeed = 8
+	GOptionShotSpeed GOption = 8
 
 	// GOptionShotMinEnergy is the lowest shot energy allowed. A robot
 	// trying to shoot with less energy will fail to shoot.
-	GOptionShotMinEnergy = 9
+	GOptionShotMinEnergy GOption = 9
 
 	// GOptionShotMaxEnergy is the maximum shot energy.
-	GOptionShotMaxEnergy = 10
+	GOptionShotMaxEnergy GOption = 10
 
 	// GOptionShotEnergyIncreaseSpeed determines how fast the robots shot
 	// energy will increase in energy/s .
-	GOptionShotEnergyIncreaseSpeed = 11
+	GOptionShotEnergyIncreaseSpeed GOption = 11
 
 	// GOptionTimeout is the longest time a game will take. When the time
 	// is up all remaining robots are killed, without getting any more
 	// points.
-	GOptionTimeout = 12
+	GOptionTimeout GOption = 12
 
 	// GOptionDebugLevel is the debug level. From 0 (no debug) to 5
 	// (highest debug level).
-	GOptionDebugLevel = 13
+	GOptionDebugLevel GOption = 13
 
 	// GOptionSendRobotCoordinates determines how coordinates are send to
 	// the robots. The following options are available:
@@ -248,7 +259,7 @@ const (
 	// - 0: No coordinates.
 	// - 1: Coordinates are given relative the starting position.
 	// - 2: Absolute coordinates.
-	GOptionSendRobotCoordinates = 14
+	GOptionSendRobotCoordinates GOption = 14
 )
 
 func (opt GOption) String() string {
@@ -297,19 +308,19 @@ const (
 	ObjectNoObject Object = -1
 
 	// ObjectRobot means that the observed object is a robot.
-	ObjectRobot = 0
+	ObjectRobot Object = 0
 
 	// ObjectShot means that the observed object is a shot.
-	ObjectShot = 1
+	ObjectShot Object = 1
 
 	// ObjectWall means that the observed object is a wall.
-	ObjectWall = 2
+	ObjectWall Object = 2
 
 	// ObjectCookie means that the observed object is a cookie.
-	ObjectCookie = 3
+	ObjectCookie Object = 3
 
 	// ObjectMine means that the observed object is a mine.
-	ObjectMine = 4
+	ObjectMine Object = 4
 )
 
 func (obj Object) String() string {
@@ -341,29 +352,29 @@ const (
 
 	// WarningProcessTimeLow means that the CPU usage has reached the CPU
 	// warning percentage. Only in competition-mode.
-	WarningProcessTimeLow = 1
+	WarningProcessTimeLow Warning = 1
 
 	// WarningMessageSentInIllegalState means that the message received
 	// couldn't be handled in this state of the program. For example Rotate
 	// is sent before the game has started.
-	WarningMessageSentInIllegalState = 2
+	WarningMessageSentInIllegalState Warning = 2
 
 	// WarningUnknownOption means that the robot sent a robot option with
 	// either illegal option name or illegal argument to that option.
-	WarningUnknownOption = 3
+	WarningUnknownOption Warning = 3
 
 	// WarningObsoleteKeyword means that the keyword sent is obsolete and
 	// should not be used any more.
-	WarningObsoleteKeyword = 4
+	WarningObsoleteKeyword Warning = 4
 
 	// WarningNameNotGiven means that the robot has not sent its name
 	// before the game begins. This happens if the robot startup time is
 	// too short or the robot does not send its name early enough.
-	WarningNameNotGiven = 5
+	WarningNameNotGiven Warning = 5
 
 	// WarningColourNotGiven means that the robot has not sent its colour
 	// before the game begins.
-	WarningColourNotGiven = 6
+	WarningColourNotGiven Warning = 6
 )
 
 func (warn Warning) String() string {
@@ -589,7 +600,7 @@ func stdinReader() <-chan string {
 	go func() {
 		defer close(c)
 
-		s := bufio.NewScanner(os.Stdin)
+		s := bufio.NewScanner(osStdin)
 		for s.Scan() {
 			c <- s.Text()
 		}

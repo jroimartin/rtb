@@ -1,6 +1,12 @@
 package rtb
 
-import "testing"
+import (
+	"bytes"
+	"io"
+	"os"
+	"strings"
+	"testing"
+)
 
 func TestParseMessage(t *testing.T) {
 	tests := []struct {
@@ -233,5 +239,216 @@ func TestParseMessage(t *testing.T) {
 				t.Errorf("wrong message: got=%#v want=%#v", msg, tt.msg)
 			}
 		})
+	}
+}
+
+func TestListen(t *testing.T) {
+	osStdin = bytes.NewBufferString(`
+		GameStarts
+		YourName foo bar
+		RobotInfo 1.23 0
+		Warning 4 foo bar
+	`)
+	osStdout = io.Discard
+	defer func() {
+		osStdin = os.Stdin
+		osStdout = os.Stdout
+	}()
+
+	want := []any{
+		MessageGameStarts{},
+		MessageYourName{
+			Name: "foo bar",
+		},
+		MessageRobotInfo{
+			EnergyLevel: 1.23,
+			TeamMate:    false,
+		},
+		MessageWarning{
+			Warning: WarningObsoleteKeyword,
+			Message: "foo bar",
+		},
+	}
+
+	var got []any
+	for msg := range Listen(ListenSettings{}) {
+		got = append(got, msg)
+	}
+
+	if len(got) != len(want) {
+		t.Fatalf("invalid number of messages: got=%v want=%v", len(got), len(want))
+	}
+
+	for i := range got {
+		if got[i] != want[i] {
+			t.Fatalf("unexpected message: got=%#v want=%#v", got, want)
+		}
+	}
+}
+
+func TestRawf(t *testing.T) {
+	var buf bytes.Buffer
+	osStdout = &buf
+	defer func() { osStdout = os.Stdout }()
+
+	tests := []struct {
+		name   string
+		s      string
+		want   string
+		nilErr bool
+	}{
+		{
+			"Short string",
+			"foo",
+			"foo\n",
+			true,
+		},
+		{
+			"Valid edge case",
+			strings.Repeat("x", 127),
+			strings.Repeat("x", 127) + "\n",
+			true,
+		},
+		{
+			"Invalid edge case",
+			strings.Repeat("x", 128),
+			"",
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := rawf(tt.s)
+			if (err == nil) != tt.nilErr {
+				t.Errorf("unexpected error: got=%v", err)
+			}
+			got, err := io.ReadAll(&buf)
+			if err != nil {
+				t.Fatalf("error reading bytes.Buffer")
+			}
+			if string(got) != tt.want {
+				t.Errorf("unexpected output: got=%q want=%q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRobotMessages(t *testing.T) {
+	var buf bytes.Buffer
+	osStdout = &buf
+	defer func() { osStdout = os.Stdout }()
+
+	tests := []struct {
+		name string
+		f    func()
+		want string
+	}{
+		{
+			"RobotOption",
+			func() { robotOption(rOptionUseNonBlocking, 0) },
+			"RobotOption 3 0\n",
+		},
+		{
+			"Name",
+			func() { Name("foo") },
+			"Name foo\n",
+		},
+		{
+			"Colour",
+			func() { Colour("11aa22", "bb33cc") },
+			"Colour 11aa22 bb33cc\n",
+		},
+		{
+			"Rotate",
+			func() { Rotate(PartCannon|PartRadar, 1.23) },
+			"Rotate 6 1.230000\n",
+		},
+		{
+			"RotateTo",
+			func() { RotateTo(PartCannon|PartRadar, 1.23, 4.56) },
+			"RotateTo 6 1.230000 4.560000\n",
+		},
+		{
+			"RotateAmount",
+			func() { RotateAmount(PartCannon|PartRadar, 1.23, 4.56) },
+			"RotateAmount 6 1.230000 4.560000\n",
+		},
+		{
+			"Sweep",
+			func() { Sweep(PartCannon|PartRadar, 1.23, 4.56, 7.89) },
+			"Sweep 6 1.230000 4.560000 7.890000\n",
+		},
+		{
+			"Accelerate",
+			func() { Accelerate(1.23) },
+			"Accelerate 1.230000\n",
+		},
+		{
+			"Brake",
+			func() { Brake(1.23) },
+			"Brake 1.230000\n",
+		},
+		{
+			"Shoot",
+			func() { Shoot(1.23) },
+			"Shoot 1.230000\n",
+		},
+		{
+			"Print",
+			func() { Printf("foo bar %v", PartRobot|PartRadar) },
+			"Print foo bar Robot|Radar\n",
+		},
+		{
+			"Debug",
+			func() { Debugf("foo bar %v", PartCannon|PartRadar) },
+			"Debug foo bar Cannon|Radar\n",
+		},
+		{
+			"DebugLine",
+			func() { DebugLine(1.23, 4.56, 7.89, 10.11) },
+			"DebugLine 1.230000 4.560000 7.890000 10.110000\n",
+		},
+		{
+			"DebugCircle",
+			func() { DebugCircle(1.23, 4.56, 7.89) },
+			"DebugCircle 1.230000 4.560000 7.890000\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.f()
+			got, err := io.ReadAll(&buf)
+			if err != nil {
+				t.Fatalf("error reading bytes.Buffer")
+			}
+			if string(got) != tt.want {
+				t.Errorf("unexpected output: got=%q want=%q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPartString(t *testing.T) {
+	tests := []struct {
+		p    Part
+		want string
+	}{
+		{PartRobot, "Robot"},
+		{PartCannon, "Cannon"},
+		{PartRadar, "Radar"},
+		{PartRobot | PartCannon, "Robot|Cannon"},
+		{PartRobot | PartRadar, "Robot|Radar"},
+		{PartCannon | PartRadar, "Cannon|Radar"},
+		{PartRobot | PartCannon | PartRadar, "Robot|Cannon|Radar"},
+		{Part(15), "Robot|Cannon|Radar"},
+		{Part(16), "unknown"},
+	}
+
+	for _, tt := range tests {
+		if got := tt.p.String(); got != tt.want {
+			t.Errorf("unexpected string: got=%q want=%q", got, tt.want)
+		}
 	}
 }
