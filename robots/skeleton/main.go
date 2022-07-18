@@ -1,3 +1,4 @@
+// skeleton is a simple robot that shows how to communicate with RTB.
 package main
 
 import (
@@ -7,6 +8,8 @@ import (
 )
 
 func main() {
+	rtb.Debug = true
+
 	settings := rtb.ListenSettings{
 		SendRotationReached: 2,
 		ChanBufferCapacity:  100,
@@ -19,8 +22,10 @@ loop:
 			if !m.First {
 				continue
 			}
-			rtb.Name("Skeleton")
+			rtb.Name("skeleton")
 			rtb.Colour("00ff00", "ff0000")
+		case rtb.MessageGameOption:
+			rtb.Debugf("option: %v: %v", m.Option, m.Value)
 		case rtb.MessageGameStarts:
 			rtb.Sweep(rtb.PartRadar, math.Pi/4, -math.Pi/2, math.Pi/2)
 		case rtb.MessageRadar:
