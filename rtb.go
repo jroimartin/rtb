@@ -165,7 +165,7 @@ func Debugf(format string, a ...any) error {
 }
 
 // DebugLine draws a line direct to the arena. This is only allowed in the
-// highest debug level(5), otherwise a warning message is sent. The arguments
+// highest debug level (5), otherwise a warning message is sent. The arguments
 // are the start and end point of the line given in polar coordinates relative
 // to the robot.
 func DebugLine(angle1, radius1, angle2, radius2 float64) error {
