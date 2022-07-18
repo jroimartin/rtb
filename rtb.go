@@ -645,8 +645,12 @@ func parseInitialize(fields []string) (msg any, err error) {
 	if len(fields) != 2 {
 		return nil, errors.New("wrong number of arguments")
 	}
+	first, err := strconv.ParseInt(fields[1], 10, 0)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse first %q: %v", fields[1], err)
+	}
 	msg = MessageInitialize{
-		First: fields[1] == "1",
+		First: first == 1,
 	}
 	return msg, nil
 }
@@ -662,7 +666,7 @@ func parseYourName(fields []string) (msg any, err error) {
 }
 
 func parseYourColour(fields []string) (msg any, err error) {
-	if len(fields) < 2 {
+	if len(fields) != 2 {
 		return nil, errors.New("wrong number of arguments")
 	}
 	msg = MessageYourColour{
@@ -777,9 +781,16 @@ func parseRobotInfo(fields []string) (msg any, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not parse energy level %q: %v", fields[1], err)
 	}
+	teamMate, err := strconv.ParseInt(fields[2], 10, 0)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse teammate %q: %v", fields[2], err)
+	}
+	if teamMate != 0 && teamMate != 1 {
+		return nil, fmt.Errorf("unknown teammate value %v: %v", teamMate, err)
+	}
 	msg = MessageRobotInfo{
 		EnergyLevel: energyLevel,
-		TeamMate:    fields[2] == "1",
+		TeamMate:    teamMate == 1,
 	}
 	return msg, nil
 }
