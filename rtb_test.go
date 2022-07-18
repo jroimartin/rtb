@@ -79,8 +79,8 @@ func TestParseMessage(t *testing.T) {
 			"Radar",
 			"Radar 1.2 3 4.5",
 			MessageRadar{
-				Distance: 1.2,
-				Object: ObjectCookie,
+				Distance:   1.2,
+				Object:     ObjectCookie,
 				RadarAngle: 4.5,
 			},
 			true,
@@ -91,8 +91,8 @@ func TestParseMessage(t *testing.T) {
 			"Info",
 			"Info 1.2 3.4 5.6",
 			MessageInfo{
-				Time: 1.2,
-				Speed: 3.4,
+				Time:        1.2,
+				Speed:       3.4,
 				CannonAngle: 5.6,
 			},
 			true,
@@ -103,8 +103,8 @@ func TestParseMessage(t *testing.T) {
 			"Coordinates",
 			"Coordinates 1.2 3.4 5.6",
 			MessageCoordinates{
-				X: 1.2,
-				Y: 3.4,
+				X:     1.2,
+				Y:     3.4,
 				Angle: 5.6,
 			},
 			true,
@@ -116,7 +116,7 @@ func TestParseMessage(t *testing.T) {
 			"RobotInfo 1.2 0",
 			MessageRobotInfo{
 				EnergyLevel: 1.2,
-				TeamMate: false,
+				TeamMate:    false,
 			},
 			true,
 		},
@@ -125,7 +125,7 @@ func TestParseMessage(t *testing.T) {
 			"RobotInfo 1.2 1",
 			MessageRobotInfo{
 				EnergyLevel: 1.2,
-				TeamMate: true,
+				TeamMate:    true,
 			},
 			true,
 		},
@@ -141,7 +141,7 @@ func TestParseMessage(t *testing.T) {
 			"RotationReached",
 			"RotationReached 3",
 			MessageRotationReached{
-				PartRobot|PartCannon,
+				PartRobot | PartCannon,
 			},
 			true,
 		},
@@ -172,7 +172,7 @@ func TestParseMessage(t *testing.T) {
 			"Collision 2 3.4",
 			MessageCollision{
 				Object: ObjectWall,
-				Angle: 3.4,
+				Angle:  3.4,
 			},
 			true,
 		},
