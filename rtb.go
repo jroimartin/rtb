@@ -670,7 +670,7 @@ func parseYourColour(fields []string) (msg any, err error) {
 		return nil, errors.New("wrong number of arguments")
 	}
 	msg = MessageYourColour{
-		Colour: strings.Join(fields[1:], " "),
+		Colour: fields[1],
 	}
 	return msg, nil
 }
