@@ -559,12 +559,12 @@ func Listen(settings ListenSettings) <-chan any {
 		for {
 			line, ok := <-stdin
 			if !ok {
-				Debugf("stdin channel is closed")
+				dbgf("stdin channel is closed")
 				return
 			}
 			msg, err := parseMessage(line)
 			if err != nil {
-				Debugf("error parsing message %q: %v", line, err)
+				dbgf("error parsing message %q: %v", line, err)
 				continue
 			}
 			msgs <- msg
@@ -587,7 +587,7 @@ func stdinReader() <-chan string {
 			c <- s.Text()
 		}
 		if err := s.Err(); err != nil {
-			Debugf("error reading from stdin: %v", err)
+			dbgf("error reading from stdin: %v", err)
 			return
 		}
 	}()
@@ -879,4 +879,15 @@ func parseExitRobot(fields []string) (msg any, err error) {
 		return nil, errors.New("wrong number of arguments")
 	}
 	return MessageExitRobot{}, nil
+}
+
+// Debug allows to enable debug messages.
+var Debug = false
+
+// dbg sends a debug message if Debug is true.
+func dbgf(format string, a ...any) error {
+	if !Debug {
+		return nil
+	}
+	return Debugf(format, a...)
 }
