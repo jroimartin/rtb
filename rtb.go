@@ -93,16 +93,23 @@ const (
 )
 
 func (p Part) String() string {
-	switch p {
-	case PartRobot:
-		return "Robot"
-	case PartCannon:
-		return "Cannon"
-	case PartRadar:
-		return "Radar"
-	default:
+	var parts []string
+
+	if p&PartRobot != 0 {
+		parts = append(parts, "Robot")
+	}
+	if p&PartCannon != 0 {
+		parts = append(parts, "Cannon")
+	}
+	if p&PartRadar != 0 {
+		parts = append(parts, "Radar")
+	}
+
+	if len(parts) == 0 {
 		return "unknown"
 	}
+
+	return strings.Join(parts, "|")
 }
 
 // Rotate sets the angular velocity for the robot, its cannon and/or its radar.

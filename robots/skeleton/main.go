@@ -26,6 +26,8 @@ loop:
 			rtb.Colour("00ff00", "ff0000")
 		case rtb.MessageGameOption:
 			rtb.Debugf("option: %v: %v", m.Option, m.Value)
+		case rtb.MessageRotationReached:
+			rtb.Debugf("rotation reached: %v", m.Part)
 		case rtb.MessageGameStarts:
 			rtb.Sweep(rtb.PartRadar, math.Pi/4, -math.Pi/2, math.Pi/2)
 		case rtb.MessageRadar:
