@@ -645,13 +645,16 @@ func parseInitialize(fields []string) (msg any, err error) {
 	if len(fields) != 2 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	first, err := strconv.ParseInt(fields[1], 10, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse first %q: %v", fields[1], err)
 	}
+
 	msg = MessageInitialize{
 		First: first == 1,
 	}
+
 	return msg, nil
 }
 
@@ -659,9 +662,11 @@ func parseYourName(fields []string) (msg any, err error) {
 	if len(fields) < 2 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	msg = MessageYourName{
 		Name: strings.Join(fields[1:], " "),
 	}
+
 	return msg, nil
 }
 
@@ -669,9 +674,11 @@ func parseYourColour(fields []string) (msg any, err error) {
 	if len(fields) != 2 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	msg = MessageYourColour{
 		Colour: fields[1],
 	}
+
 	return msg, nil
 }
 
@@ -679,18 +686,22 @@ func parseGameOption(fields []string) (msg any, err error) {
 	if len(fields) != 3 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	option, err := strconv.ParseInt(fields[1], 10, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse option %q: %v", fields[1], err)
 	}
+
 	value, err := strconv.ParseFloat(fields[2], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse value %q: %v", fields[2], err)
 	}
+
 	msg = MessageGameOption{
 		Option: GOption(option),
 		Value:  value,
 	}
+
 	return msg, nil
 }
 
@@ -698,6 +709,7 @@ func parseGameStarts(fields []string) (msg any, err error) {
 	if len(fields) != 1 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	return MessageGameStarts{}, nil
 }
 
@@ -705,23 +717,28 @@ func parseRadar(fields []string) (msg any, err error) {
 	if len(fields) != 4 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	distance, err := strconv.ParseFloat(fields[1], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse distance %q: %v", fields[1], err)
 	}
+
 	object, err := strconv.ParseInt(fields[2], 10, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse object type %q: %v", fields[2], err)
 	}
+
 	radarAngle, err := strconv.ParseFloat(fields[3], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse angle %q: %v", fields[3], err)
 	}
+
 	msg = MessageRadar{
 		Distance:   distance,
 		Object:     Object(object),
 		RadarAngle: radarAngle,
 	}
+
 	return msg, nil
 }
 
@@ -729,23 +746,28 @@ func parseInfo(fields []string) (msg any, err error) {
 	if len(fields) != 4 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	time, err := strconv.ParseFloat(fields[1], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse time %q: %v", fields[1], err)
 	}
+
 	speed, err := strconv.ParseFloat(fields[2], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse speed %q: %v", fields[2], err)
 	}
+
 	cannonAngle, err := strconv.ParseFloat(fields[3], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse cannon angle %q: %v", fields[3], err)
 	}
+
 	msg = MessageInfo{
 		Time:        time,
 		Speed:       speed,
 		CannonAngle: cannonAngle,
 	}
+
 	return msg, nil
 }
 
@@ -753,23 +775,28 @@ func parseCoordinates(fields []string) (msg any, err error) {
 	if len(fields) != 4 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	x, err := strconv.ParseFloat(fields[1], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse x %q: %v", fields[1], err)
 	}
+
 	y, err := strconv.ParseFloat(fields[2], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse y %q: %v", fields[2], err)
 	}
+
 	angle, err := strconv.ParseFloat(fields[3], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse angle %q: %v", fields[3], err)
 	}
+
 	msg = MessageCoordinates{
 		X:     x,
 		Y:     y,
 		Angle: angle,
 	}
+
 	return msg, nil
 }
 
@@ -777,21 +804,26 @@ func parseRobotInfo(fields []string) (msg any, err error) {
 	if len(fields) != 3 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	energyLevel, err := strconv.ParseFloat(fields[1], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse energy level %q: %v", fields[1], err)
 	}
+
 	teamMate, err := strconv.ParseInt(fields[2], 10, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse teammate %q: %v", fields[2], err)
 	}
+
 	if teamMate != 0 && teamMate != 1 {
 		return nil, fmt.Errorf("unknown teammate value %v: %v", teamMate, err)
 	}
+
 	msg = MessageRobotInfo{
 		EnergyLevel: energyLevel,
 		TeamMate:    teamMate == 1,
 	}
+
 	return msg, nil
 }
 
@@ -799,13 +831,16 @@ func parseRotationReached(fields []string) (msg any, err error) {
 	if len(fields) != 2 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	part, err := strconv.ParseInt(fields[1], 10, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse robot part %q: %v", fields[1], err)
 	}
+
 	msg = MessageRotationReached{
 		Part: Part(part),
 	}
+
 	return msg, nil
 }
 
@@ -813,13 +848,16 @@ func parseEnergy(fields []string) (msg any, err error) {
 	if len(fields) != 2 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	energyLevel, err := strconv.ParseFloat(fields[1], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse energy level %q: %v", fields[1], err)
 	}
+
 	msg = MessageEnergy{
 		EnergyLevel: energyLevel,
 	}
+
 	return msg, nil
 }
 
@@ -827,13 +865,16 @@ func parseRobotsLeft(fields []string) (msg any, err error) {
 	if len(fields) != 2 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	numRobots, err := strconv.ParseInt(fields[1], 10, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse number of robots %q: %v", fields[1], err)
 	}
+
 	msg = MessageRobotsLeft{
 		NumRobots: int(numRobots),
 	}
+
 	return msg, nil
 }
 
@@ -841,18 +882,22 @@ func parseCollision(fields []string) (msg any, err error) {
 	if len(fields) != 3 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	object, err := strconv.ParseInt(fields[1], 10, 0)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse object type %q: %v", fields[1], err)
 	}
+
 	angle, err := strconv.ParseFloat(fields[2], 64)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse angle %q: %v", fields[2], err)
 	}
+
 	msg = MessageCollision{
 		Object: Object(object),
 		Angle:  angle,
 	}
+
 	return msg, nil
 }
 
@@ -875,6 +920,7 @@ func parseWarning(fields []string) (msg any, err error) {
 		Warning: Warning(warning),
 		Message: warnMsg,
 	}
+
 	return msg, nil
 }
 
@@ -882,6 +928,7 @@ func parseDead(fields []string) (msg any, err error) {
 	if len(fields) != 1 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	return MessageDead{}, nil
 }
 
@@ -889,6 +936,7 @@ func parseGameFinishes(fields []string) (msg any, err error) {
 	if len(fields) != 1 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	return MessageGameFinishes{}, nil
 }
 
@@ -896,6 +944,7 @@ func parseExitRobot(fields []string) (msg any, err error) {
 	if len(fields) != 1 {
 		return nil, errors.New("wrong number of arguments")
 	}
+
 	return MessageExitRobot{}, nil
 }
 
