@@ -246,6 +246,7 @@ func TestListen(t *testing.T) {
 	osStdin = bytes.NewBufferString(`
 		GameStarts
 		YourName foo bar
+		InvalidMessage
 		RobotInfo 1.23 0
 		Warning 4 foo bar
 	`)
