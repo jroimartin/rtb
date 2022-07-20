@@ -72,11 +72,11 @@ func robotOption(option rOption, value int) error {
 	return rawf("RobotOption %d %d", option, value)
 }
 
-// Name sets the name of the robot. When receiving the Initialize message with
-// argument 1, indicating that this is the first sequence, you should send your
-// name. If your name ends with the string "Team: teamname", you will be in the
-// team "teamname". For example "foo Team: bar" will assign you to the team
-// "bar" and your name will be "foo".
+// Name sets the name of the robot. When receiving a MessageInitialize, if
+// MessageInitialize.First is equal to true, you should send your name. If your
+// name ends with the string "Team: teamname", you will be in the team
+// "teamname". For example "foo Team: bar" will assign you to the team "bar"
+// and your name will be "foo".
 func Name(name string) error {
 	return rawf("Name %s", name)
 }
@@ -84,13 +84,15 @@ func Name(name string) error {
 // hexColourRe is a regexp that matches a valid hex colour.
 var hexColourRe = regexp.MustCompile(`^[[:xdigit:]]{6}$`)
 
-// Colour sets your colour. The colours are like normal football shirts, the
-// home colour is used unless it is already used. Otherwise the away colour or,
-// as a last resort, a non-occupied colour is selected randomly. Colours are
-// specified using a hex string of the form "11aa22".
+// Colour sets your colour. When receiving a MessageInitialize, if
+// MessageInitialize.First is equal to true, you should send your colour. The
+// colours are like normal football shirts, the home colour is used unless it
+// is already used. Otherwise the away colour or, as a last resort, a
+// non-occupied colour is selected randomly. Colours are specified using a hex
+// string of the form "11aa22".
 func Colour(homeColour, awayColour string) error {
 	if !hexColourRe.MatchString(homeColour) || !hexColourRe.MatchString(awayColour) {
-		return fmt.Errorf("invalid colour")
+		return errors.New("invalid colour")
 	}
 	return rawf("Colour %s %s", homeColour, awayColour)
 }
