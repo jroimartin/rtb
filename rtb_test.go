@@ -453,3 +453,55 @@ func TestPartString(t *testing.T) {
 		}
 	}
 }
+
+func TestColourValidation(t *testing.T) {
+	osStdout = io.Discard
+	defer func() { osStdout = os.Stdout }()
+
+	tests := []struct {
+		name       string
+		homeColour string
+		awayColour string
+		nilErr     bool
+	}{
+		{
+			"Valid colours",
+			"11aa22",
+			"bb33cc",
+			true,
+		},
+		{
+			"Invalid home colour",
+			"11 a22",
+			"bb33cc",
+			false,
+		},
+		{
+			"Invalid away colour",
+			"11aa22",
+			"bb 3cc",
+			false,
+		},
+		{
+			"Long colour",
+			"11aa220",
+			"bb33cc",
+			false,
+		},
+		{
+			"Short colour",
+			"11aa22",
+			"bb33c",
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := Colour(tt.homeColour, tt.awayColour)
+			if (err == nil) != tt.nilErr {
+				t.Errorf("unexpected error: got=%v", err)
+			}
+		})
+	}
+}

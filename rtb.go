@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -80,11 +81,17 @@ func Name(name string) error {
 	return rawf("Name %s", name)
 }
 
+// hexColourRe is a regexp that matches a valid hex colour.
+var hexColourRe = regexp.MustCompile(`^[[:xdigit:]]{6}$`)
+
 // Colour sets your colour. The colours are like normal football shirts, the
 // home colour is used unless it is already used. Otherwise the away colour or,
 // as a last resort, a non-occupied colour is selected randomly. Colours are
 // specified using a hex string of the form "11aa22".
 func Colour(homeColour, awayColour string) error {
+	if !hexColourRe.MatchString(homeColour) || !hexColourRe.MatchString(awayColour) {
+		return fmt.Errorf("invalid colour")
+	}
 	return rawf("Colour %s %s", homeColour, awayColour)
 }
 
@@ -582,7 +589,7 @@ func Listen(settings ListenSettings) <-chan any {
 			}
 			msg, err := parseMessage(line)
 			if err != nil {
-				dbgf("error parsing message %q: %v", line, err)
+				dbgf("error parsing message")
 				continue
 			}
 			msgs <- msg
@@ -605,7 +612,7 @@ func stdinReader() <-chan string {
 			c <- s.Text()
 		}
 		if err := s.Err(); err != nil {
-			dbgf("error reading from stdin: %v", err)
+			dbgf("error reading from stdin")
 			return
 		}
 	}()
