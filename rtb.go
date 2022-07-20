@@ -582,7 +582,7 @@ func Listen(settings ListenSettings) <-chan any {
 			}
 			msg, err := parseMessage(line)
 			if err != nil {
-				dbgf("error parsing message %q: %v", line, err)
+				dbgf("error parsing message")
 				continue
 			}
 			msgs <- msg
@@ -605,7 +605,7 @@ func stdinReader() <-chan string {
 			c <- s.Text()
 		}
 		if err := s.Err(); err != nil {
-			dbgf("error reading from stdin: %v", err)
+			dbgf("error reading from stdin")
 			return
 		}
 	}()
